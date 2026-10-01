@@ -1,5 +1,8 @@
 # Task 2: AI Chatbot & NLP System - Customer Service Chatbot
 
+## Live Demo
+🚀 **Try the live application:** [https://invoqe-ai-chatbot-n5ekzeuik-gyanankur23s-projects.vercel.app/](https://invoqe-ai-chatbot-n5ekzeuik-gyanankur23s-projects.vercel.app/)
+
 ## Overview
 This project implements an intelligent customer service chatbot capable of understanding user queries and providing relevant responses using NLP techniques. It includes text preprocessing, intent classification using TF-IDF and machine learning, and a FastAPI backend with a web interface.
 
