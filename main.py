@@ -10,12 +10,10 @@ from typing import Optional
 import json
 import os
 
-from chatbot_engine import ChatbotEngine
-
 # Initialize FastAPI app
 app = FastAPI(
     title="AI Chatbot API",
-    description="Customer Service Chatbot with NLP Intent Classification",
+    description="Customer Service Chatbot (simplified version for Vercel)",
     version="1.0.0"
 )
 
@@ -28,18 +26,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize chatbot engine
-chatbot = None
+# Simple rule-based responses for deployment
+INTENTS = {
+    "greeting": ["hello", "hi", "hey", "good morning", "good afternoon"],
+    "goodbye": ["bye", "goodbye", "see you", "farewell"],
+    "help": ["help", "assist", "support", "need help"],
+    "thanks": ["thank", "thanks", "appreciate"],
+    "pricing": ["price", "cost", "how much", "pricing"],
+    "contact": ["contact", "email", "phone", "reach"],
+}
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize chatbot on startup"""
-    global chatbot
-    try:
-        chatbot = ChatbotEngine()
-        print("Chatbot initialized successfully")
-    except Exception as e:
-        print(f"Error initializing chatbot: {e}")
+RESPONSES = {
+    "greeting": "Hello! How can I help you today?",
+    "goodbye": "Goodbye! Have a great day!",
+    "help": "I'm here to help. What do you need assistance with?",
+    "thanks": "You're welcome! Is there anything else I can help with?",
+    "pricing": "Our pricing plans start at $10/month. Would you like more details?",
+    "contact": "You can reach us at support@example.com or call 1-800-123-4567.",
+    "unknown": "I'm not sure I understand. Could you please rephrase that?"
+}
+
+def classify_intent(message):
+    """Simple rule-based intent classification"""
+    message_lower = message.lower()
+    for intent, keywords in INTENTS.items():
+        for keyword in keywords:
+            if keyword in message_lower:
+                return intent, 0.9
+    return "unknown", 0.3
 
 # Request/Response models
 class ChatRequest(BaseModel):
@@ -65,15 +79,12 @@ async def root():
     """Root endpoint"""
     return HealthResponse(
         status="healthy",
-        message="AI Chatbot API is running"
+        message="AI Chatbot API is running (simplified version for Vercel)"
     )
 
 @app.get("/health", response_model=HealthResponse)
 async def health():
     """Health check endpoint"""
-    if chatbot is None:
-        raise HTTPException(status_code=503, detail="Chatbot not initialized")
-    
     return HealthResponse(
         status="healthy",
         message="Chatbot is ready"
@@ -82,16 +93,14 @@ async def health():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """Chat endpoint to process user messages"""
-    if chatbot is None:
-        raise HTTPException(status_code=503, detail="Chatbot not initialized")
-    
     try:
-        result = chatbot.chat(request.message)
+        intent, confidence = classify_intent(request.message)
+        response = RESPONSES.get(intent, RESPONSES["unknown"])
         
         return ChatResponse(
-            intent=result['intent'],
-            confidence=result['confidence'],
-            response=result['response'],
+            intent=intent,
+            confidence=confidence,
+            response=response,
             user_id=request.user_id
         )
     except Exception as e:
@@ -100,14 +109,9 @@ async def chat(request: ChatRequest):
 @app.get("/intents", response_model=IntentsResponse)
 async def get_intents():
     """Get all available intents"""
-    if chatbot is None:
-        raise HTTPException(status_code=503, detail="Chatbot not initialized")
-    
-    intents = chatbot.get_all_intents()
-    
     return IntentsResponse(
-        intents=intents,
-        count=len(intents)
+        intents=list(INTENTS.keys()),
+        count=len(INTENTS)
     )
 
 if __name__ == "__main__":
