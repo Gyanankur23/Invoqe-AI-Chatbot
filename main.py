@@ -76,7 +76,12 @@ class IntentsResponse(BaseModel):
 
 @app.get("/", response_model=HealthResponse)
 async def root():
-    """Root endpoint"""
+    """Root endpoint - return HTML for frontend"""
+    return FileResponse('web_interface.html')
+
+@app.get("/api", response_model=HealthResponse)
+async def api_root():
+    """API root endpoint"""
     return HealthResponse(
         status="healthy",
         message="AI Chatbot API is running (simplified version for Vercel)"
