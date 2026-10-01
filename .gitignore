@@ -11,7 +11,6 @@ env/
 *.pkl
 *.h5
 *.csv
-*.json
 # Allow plots/*.png
 !plots/*.png
 # Allow vercel.json
