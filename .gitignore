@@ -14,6 +14,8 @@ env/
 *.json
 # Allow plots/*.png
 !plots/*.png
+# Allow vercel.json
+!vercel.json
 
 # IDE
 .vscode/
